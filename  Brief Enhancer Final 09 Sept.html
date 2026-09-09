@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brief Enhancer — Architecture Studio</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #2E3F5C;
+    --y2: #1D5E8A;
+    --y3: #2E5E3A;
+    --y4: #5C2E2E;
+    --bg: #ffffff;
+    --bg2: #f7f8fa;
+    --bg3: #eef0f3;
+    --text: #1a1a1a;
+    --text2: #555;
+    --text3: #888;
+    --border: #d8dce3;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .shell { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.5rem; }
+  .header-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-icon i { color: #fff; font-size: 17px; }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+  .tagline { font-size: 13.5px; color: var(--text2); line-height: 1.65; margin-bottom: 1rem; }
+
+  .nav { display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; }
+  .nav-btn { background: none; border: none; cursor: pointer; color: var(--text2); font-size: 13px; padding: 0; display: flex; align-items: center; gap: 4px; }
+  .nav-btn:hover { color: var(--text); }
+  .nav-sep { color: var(--border); font-size: 13px; }
+
+  .field { margin-bottom: 1.25rem; }
+  .field label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 3px; }
+  .field .hint { font-size: 12px; color: var(--text3); margin: 2px 0 6px; line-height: 1.5; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%; padding: 9px 12px; border: 0.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg2);
+    outline: none; line-height: 1.6;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,63,92,0.1); }
+  textarea { resize: vertical; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .two-col { grid-template-columns: 1fr; } }
+
+  .year-pills { display: flex; gap: 8px; }
+  .year-pill {
+    flex: 1; padding: 8px 6px; border-radius: 8px; font-size: 12px; cursor: pointer; text-align: center;
+    border: 0.5px solid var(--border); background: var(--bg2); color: var(--text2); font-weight: 400;
+    font-family: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; line-height: 1.3;
+  }
+
+  .file-input-wrap { position: relative; border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; }
+  .file-input-wrap:hover { border-color: var(--accent); background: var(--bg2); }
+  .file-input-wrap input[type=file] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+  .file-input-icon { font-size: 32px; margin-bottom: 8px; color: var(--accent); }
+  .file-input-label { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .file-input-hint { font-size: 12px; color: var(--text3); }
+  .file-input-selected { font-size: 13px; color: var(--text2); margin-top: 8px; padding: 6px 10px; background: var(--bg2); border-radius: 6px; display: inline-block; }
+
+  .primary-btn {
+    width: 100%; padding: 12px 20px; border-radius: 9px; font-size: 14px; font-weight: 600;
+    border: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer; font-family: inherit;
+  }
+  .primary-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+
+  .secondary-btn {
+    background: none; border: 0.5px solid var(--border); border-radius: 8px; padding: 8px 14px;
+    font-size: 13px; cursor: pointer; color: var(--text2); display: flex; align-items: center; gap: 6px;
+    font-family: inherit;
+  }
+  .secondary-btn:hover { background: var(--bg2); color: var(--text); }
+
+  .spinner-wrap { display: flex; align-items: center; gap: 12px; padding: 2.5rem 0; color: var(--text2); font-size: 14px; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box { background: #fff0f0; border: 0.5px solid #ffcccc; border-radius: 8px; padding: 1rem; font-size: 14px; color: #cc0000; line-height: 1.7; }
+  .warning-box { background: #fff0f0; border: 0.5px solid #ffcccc; border-radius: 8px; padding: 1rem; font-size: 13.5px; color: #7a4400; line-height: 1.7; margin-bottom: 1.5rem; }
+
+  .inconsistency-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.25rem; }
+  .inconsistency-header { padding: 0.875rem 1rem; border-bottom: 0.5px solid var(--border); background: #fff0f0; color: #cc0000; font-weight: 600; font-size: 13.5px; }
+  .inconsistency-body { padding: 1rem; }
+  .inconsistency-item { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 0.5px solid var(--border); }
+  .inconsistency-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .inconsistency-title { font-weight: 600; color: var(--text); margin-bottom: 4px; font-size: 13.5px; }
+  .inconsistency-note { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .inconsistency-passage { background: #ffe6e6; border-left: 2px solid #ff9999; padding: 8px 10px; border-radius: 4px; margin-top: 6px; font-size: 12px; font-family: 'Courier New', monospace; color: #5c0000; line-height: 1.5; }
+
+  .result-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.75rem; margin-top: 0.5rem; margin-bottom: 1.25rem; }
+  .result-badge { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 3px 10px; border-radius: 5px; margin-bottom: 8px; }
+  .result-body { font-family: Georgia, serif; font-size: 14.5px; line-height: 1.9; white-space: pre-wrap; color: var(--text); }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; }
+  .copy-btn { background: none; border: 0.5px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 13px; cursor: pointer; color: var(--text2); display: flex; align-items: center; gap: 6px; font-family: inherit; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .info-note { background: #f0f4ff; border: 0.5px solid #c5d0ee; border-radius: 8px; padding: 0.625rem 0.875rem; font-size: 12.5px; color: #3a4a7a; line-height: 1.6; margin-bottom: 1rem; }
+  .disclaimer-box { background: #f9f5ff; border: 0.5px solid #e8ddf5; border-radius: 8px; padding: 0.875rem 1rem; font-size: 12.5px; color: #5C3A7A; line-height: 1.6; margin-bottom: 1.25rem; }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  @media (max-width: 560px) { .compare-grid { grid-template-columns: 1fr; } }
+
+  .programme-panel { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .programme-header { padding: 0.75rem 1rem; border-bottom: 0.5px solid var(--border); font-size: 12.5px; font-weight: 600; color: var(--text2); }
+  .programme-body { padding: 0.875rem; min-height: 80px; }
+
+  .readonly-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 0.5px solid var(--border); }
+  .readonly-row:last-child { border-bottom: none; }
+  .readonly-name { color: var(--text); }
+  .readonly-area { color: var(--text2); white-space: nowrap; margin-left: 8px; }
+
+  .space-row { display: grid; grid-template-columns: 1fr 70px 26px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .space-row input { padding: 6px 8px; font-size: 12.5px; }
+  .remove-btn { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; padding: 0; line-height: 1; }
+  .remove-btn:hover { color: #c00; }
+  .add-space-btn { background: none; border: 0.5px dashed var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; color: var(--text2); cursor: pointer; width: 100%; font-family: inherit; margin-top: 4px; }
+  .add-space-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .empty-note { font-size: 12.5px; color: var(--text3); font-style: italic; padding: 4px 0; }
+
+  .final-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+  .final-table th, .final-table td { border: 0.5px solid var(--border); padding: 8px 10px; text-align: left; }
+  .final-table th { background: var(--bg3); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text2); }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="header">
+    <div class="header-icon"><i class="ti ti-pencil"></i></div>
+    <h1>Brief Enhancer</h1>
+  </div>
+  <p class="tagline">Briefs that invite discovery.</p>
+  <p style="font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">The brief leads the participant on a journey of discovery. The design of a building is merely the vehicle for this journey, not the destination.</p>
+
+  <div id="app"></div>
+</div>
+
+<script>
+const S = {
+  step: 1,
+  year: '2',
+  projectTitle: '',
+  theme: '',
+  intent: '',
+  buildingType: '',
+  scale: '',
+  duration: '',
+  site: '',
+  notes: '',
+  uploadedFile: null,
+  uploadedText: '',
+  uploadFileName: '',
+  analyzing: false,
+  inconsistencies: [],
+  inconsistencyCount: 0,
+  enhancing: false,
+  programmeLoading: false,
+  extractedProgramme: [],
+  aiProgramme: [],
+  result: '',
+  error: '',
+  view: null,
+  copyLabel: 'Copy',
+  apiKey: localStorage.getItem('bb_api_key') || '',
+};
+
+function set(upd) { Object.assign(S, typeof upd === 'function' ? upd(S) : upd); render(); }
+
+const YCOLS = { '2': '#1D5E8A', '3': '#2E5E3A', '4': '#5C2E2E', '5': '#4A3728' };
+function activeColor() { return YCOLS[S.year] || '#2E3F5C'; }
+
+// ── PROMPTS ──────────────────────────────────────────────────────────────
+const SYS = 'Detect ONLY critical inconsistencies. DO NOT FLAG: tone, duration, pedagogy. CRITICAL: Theme Mismatch, Building Type, Scale, Conceptual Intent, Copy-Paste Evidence.';
+
+const INCONSISTENCY_PROMPT = (uploadedText, inputs) => 'Analyze this brief against inputs.\n\n' +
+  'INPUT: Year ' + inputs.year + ', Theme: "' + inputs.theme + '", Intent: "' + inputs.intent + '", Building: "' + (inputs.buildingType || 'unspecified') + '", Scale: "' + (inputs.scale || 'unspecified') + '"\n\n' +
+  'BRIEF: ' + uploadedText + '\n\n' +
+  'JSON array of { "category": "Theme Mismatch|Building Type|Scale|Conceptual Intent|Copy-Paste Evidence", "severity": "critical", "explanation": "...", "passage": "quote under 100 words", "recommendation": "fix" }\n\n' +
+  'Return [] if no issues.';
+
+const ENHANCE_PROMPT = (uploadedText) => 'Rewrite this brief to be richer, more invitational, and more carefully crafted.\n\n' +
+  'BRIEF: ' + uploadedText + '\n\n' +
+  'Return enhanced brief prose only (no programme, no headings for programme). Aim for: conversational tone, precise vocabulary (liminal, palimpsest), flowing prose, implicit connections, voice that trusts the student.';
+
+const PROGRAMME_PROMPT = (uploadedText, inputs) => 'You are an architecture programme consultant.\n\n' +
+  'TASK 1 - EXTRACT: Check if the uploaded brief already contains an explicit space programme (a list of spaces/rooms with areas in sqm). If found, extract it exactly as stated (name + area only). If none is present, return an empty array.\n\n' +
+  'TASK 2 - GENERATE: Based on the input parameters, generate a realistic, appropriate space programme (8-14 spaces with areas in sqm) for this brief.\n\n' +
+  'INPUT: Year ' + inputs.year + ', Building type: "' + (inputs.buildingType || 'infer from brief') + '", Scale: "' + (inputs.scale || 'infer a realistic total from brief') + '", Theme: "' + inputs.theme + '"\n\n' +
+  'BRIEF: ' + uploadedText + '\n\n' +
+  'Respond ONLY as JSON: { "existing": [{"name": "...", "area": number}], "generated": [{"name": "...", "area": number}] }\n\n' +
+  'If no explicit programme is in the brief, "existing" must be [].';
+
+// ── API ──────────────────────────────────────────────────────────────────
+async function claude(prompt, sys) {
+  const key = S.apiKey.trim();
+  if (!key) throw new Error('No API key. Add one in Settings.');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 3000,
+      system: sys || SYS,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.content?.find(b => b.type === 'text')?.text || '';
+}
+
+async function readFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    if (file.type.startsWith('image/')) {
+      reader.onload = e => resolve({ type: 'image', content: e.target.result, mediaType: file.type });
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    } else {
+      reject(new Error('Unsupported file type. Use a photo/scan image, DOCX, or paste text below.'));
+    }
+  });
+}
+
+async function extractTextFromImage(imageDataUrl, mediaType) {
+  const key = S.apiKey.trim();
+  if (!key) throw new Error('API key required for image extraction.');
+  const base64 = imageDataUrl.split(',')[1];
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 3000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: 'Extract all text from this image. Return text only, no explanation.' }
+        ]
+      }]
+    })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error('Image extraction failed: ' + d.error.message);
+  return d.content?.find(b => b.type === 'text')?.text || '';
+}
+
+// ── DOM HELPERS ──────────────────────────────────────────────────────────
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'class') e.className = v;
+    else e.setAttribute(k, v);
+  });
+  children.flat(Infinity).forEach(c => {
+    if (c == null || c === false) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+function field(labelText, hint, inputEl) {
+  const d = el('div', { class: 'field' });
+  d.appendChild(el('label', {}, labelText));
+  if (hint) d.appendChild(el('p', { class: 'hint' }, hint));
+  d.appendChild(inputEl);
+  return d;
+}
+
+function textInput(placeholder, value, key) {
+  const inp = el('input', { type: 'text', placeholder });
+  inp.value = value || '';
+  inp.addEventListener('input', e => { S[key] = e.target.value; });
+  return inp;
+}
+
+function textArea(placeholder, value, key, minH = 90) {
+  const ta = el('textarea', { placeholder, style: { minHeight: minH + 'px' } });
+  ta.value = value || '';
+  ta.addEventListener('input', e => { S[key] = e.target.value; });
+  return ta;
+}
+
+function primaryBtn(content, color, onClick, disabled = false) {
+  const b = el('button', { class: 'primary-btn', onClick, style: { background: disabled ? 'var(--bg3)' : color, color: disabled ? 'var(--text3)' : '#fff' } }, content);
+  if (disabled) b.disabled = true;
+  return b;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── SHARED INPUT FORM (keep in sync with Brief Builder) ──────────────────
+function renderInputForm(container) {
+  const yearWrap = el('div', { class: 'field' });
+  yearWrap.appendChild(el('label', {}, 'Year level'));
+  const pills = el('div', { class: 'year-pills' });
+  [['2', '2nd Year', 'Awakening'], ['3', '3rd Year', 'Exploration'], ['4', '4th Year', 'Expansion'], ['5', '5th Year', 'Integration']].forEach(([v, year, stage]) => {
+    const c = YCOLS[v]; const active = S.year === v;
+    const b = el('button', { class: 'year-pill', onClick: () => set({ year: v }), style: { border: active ? ('2px solid ' + c) : '0.5px solid var(--border)', background: active ? (c + '14') : 'var(--bg2)', color: active ? c : 'var(--text2)', fontWeight: active ? '600' : '400' } },
+      el('div', { style: { fontSize: '13px', fontWeight: 'inherit' } }, year),
+      el('div', { style: { fontSize: '11px', fontWeight: '400', opacity: '0.85' } }, stage)
+    );
+    pills.appendChild(b);
+  });
+  yearWrap.appendChild(pills);
+  container.appendChild(yearWrap);
+
+  container.appendChild(field('Studio theme *', 'Enter the theme from the syllabus for this semester.', textInput('e.g. Climatic conditions and architectural design', S.theme, 'theme')));
+  container.appendChild(field('Building type', 'Enter the building type or typology. Optional; leave blank if not yet decided.', textInput('e.g. Community library', S.buildingType, 'buildingType')));
+  container.appendChild(field('Brief title *', 'Enter a title that reflects the intellectual intent of the studio, not the building type.', textInput('e.g. Civic Space in a Park — Bridging Eras', S.projectTitle, 'projectTitle')));
+  container.appendChild(field('Conceptual intent *', 'Describe the central question this studio is built around. Make it rich and specific.', textArea('e.g. Students should understand climate not as an engineering problem…', S.intent, 'intent', 110)));
+
+  const twoCol = el('div', { class: 'two-col' });
+  twoCol.appendChild(field('Approximate scale', 'Enter the approximate area in square metres. Optional.', textInput('e.g. 500 sqm', S.scale, 'scale')));
+  twoCol.appendChild(field('Total duration', 'Enter the total duration in weeks. Optional.', textInput('e.g. 12 weeks', S.duration, 'duration')));
+  container.appendChild(twoCol);
+
+  container.appendChild(field('Site or context', 'Describe the site or context. Optional; leave blank for an open brief.', textInput('e.g. Mediterranean coastal town', S.site, 'site')));
+  container.appendChild(field('Additional notes', 'Note any specific emphases, constraints, or values this studio should embody. Optional.', textArea('e.g. Strong emphasis on vernacular precedent', S.notes, 'notes', 70)));
+}
+
+// ── UPLOAD STEP (file: image/docx only, plus paste) ───────────────────────
+function renderUploadStep(container, onAnalyze) {
+  const yc = activeColor();
+
+  const fileWrap = el('div', { class: 'field' });
+  fileWrap.appendChild(el('label', {}, 'Upload or paste your brief *'));
+  fileWrap.appendChild(el('p', { class: 'hint' }, 'Upload a photo/scan of your brief or a DOCX file, or paste the text directly below.'));
+
+  const dropZone = el('div', { class: 'file-input-wrap' });
+  const fileInput = el('input', { type: 'file', accept: '.docx,.doc,image/jpeg,image/png,image/webp,image/gif' });
+  fileInput.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc')) {
+      set({ error: 'DOCX reading is not yet supported here — please open the file, copy its text, and paste it into the box below.' });
+      return;
+    }
+
+    set({ analyzing: true, error: '' });
+    try {
+      const fileResult = await readFile(file);
+      let text = '';
+      if (fileResult.type === 'image') {
+        if (!S.apiKey || S.apiKey.trim().length < 10) throw new Error('API key required for image extraction.');
+        text = await extractTextFromImage(fileResult.content, fileResult.mediaType);
+      }
+      S.uploadedText = text;
+      S.uploadedFile = file;
+      S.uploadFileName = file.name;
+      set({ analyzing: false });
+    } catch (err) {
+      set({ error: 'File error: ' + err.message, analyzing: false });
+    }
+  });
+
+  dropZone.appendChild(fileInput);
+  dropZone.appendChild(el('div', { class: 'file-input-icon' }, '↓'));
+  dropZone.appendChild(el('div', { class: 'file-input-label' }, 'Drop your brief here'));
+  dropZone.appendChild(el('div', { class: 'file-input-hint' }, 'Photo/scan or DOCX'));
+  if (S.uploadFileName) dropZone.appendChild(el('div', { class: 'file-input-selected' }, '✓ ' + S.uploadFileName));
+
+  fileWrap.appendChild(dropZone);
+  container.appendChild(fileWrap);
+
+  const pasteWrap = el('div', { class: 'field' });
+  pasteWrap.appendChild(el('label', {}, 'Or paste text here'));
+  const pasteArea = el('textarea', { placeholder: 'Paste your brief text here…', style: { minHeight: '140px' } });
+  pasteArea.value = S.uploadedText && !S.uploadFileName ? S.uploadedText : '';
+  pasteWrap.appendChild(pasteArea);
+  container.appendChild(pasteWrap);
+
+  if (S.analyzing) {
+    const sp = el('div', { class: 'spinner-wrap', style: { marginBottom: '1.25rem' } });
+    sp.appendChild(el('div', { class: 'spinner' }));
+    sp.appendChild(document.createTextNode('Reading file…'));
+    container.appendChild(sp);
+  }
+
+  if (S.error) {
+    container.appendChild(el('div', { class: 'error-box' }, '⚠ ' + S.error));
+  }
+
+  const analyzeBtn = primaryBtn(
+    el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, el('i', { class: 'ti ti-search', style: { fontSize: '14px' } }), ' Analyze for inconsistencies'),
+    yc,
+    () => {
+      if (!S.uploadedText || !S.uploadedText.trim()) { alert('Please upload or paste a brief before continuing.'); return; }
+      if (S.analyzing) return;
+      onAnalyze();
+    },
+    false
+  );
+  container.appendChild(analyzeBtn);
+
+  // Paste updates state AND directly toggles the button's enabled state,
+  // without a full re-render (which would lose cursor position mid-typing).
+  pasteArea.addEventListener('input', e => {
+    S.uploadedText = e.target.value;
+    S.uploadFileName = '';
+    S.uploadedFile = null;
+    const hasText = S.uploadedText.trim().length > 0;
+    analyzeBtn.disabled = !hasText;
+    analyzeBtn.style.background = hasText ? yc : 'var(--bg3)';
+    analyzeBtn.style.color = hasText ? '#fff' : 'var(--text3)';
+  });
+}
+
+// ── DOCX / COPY BUILDERS ───────────────────────────────────────────────────
+function getProseParagraphs() {
+  return S.result.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+}
+
+function buildFinalHtml() {
+  // Word strips <style> blocks and most CSS classes on paste, but it DOES respect
+  // inline style="" attributes on each element. So every paragraph and table cell
+  // below carries its own explicit margin/padding — this is what keeps paragraph
+  // spacing and table borders intact when pasted into Word/Microsoft 365.
+  const pStyle = 'margin:0 0 12pt 0; font-family:Georgia,serif; font-size:11pt; line-height:1.5;';
+  const paragraphs = getProseParagraphs();
+  let html = '<div>';
+  paragraphs.forEach(p => {
+    html += '<p style="' + pStyle + '">' + escapeHtml(p) + '</p>';
+  });
+  html += '<h3 style="margin:18pt 0 6pt 0; font-family:Georgia,serif;">Space Programme</h3>';
+  html += '<p style="margin:0 0 12pt 0; font-family:Georgia,serif; font-size:10pt; font-style:italic; color:#555;">This space programme was generated by AI based on your inputs and may have been edited before finalizing.</p>';
+  html += '<table style="border-collapse:collapse; width:100%; margin-bottom:12pt;" border="1" cellspacing="0" cellpadding="6">';
+  html += '<tr><th style="border:1px solid #999; padding:6pt; text-align:left; background:#eee;">Space</th><th style="border:1px solid #999; padding:6pt; text-align:left; background:#eee;">Area (sqm)</th></tr>';
+  S.aiProgramme.forEach(sp => {
+    html += '<tr><td style="border:1px solid #999; padding:6pt;">' + escapeHtml(sp.name || '') + '</td><td style="border:1px solid #999; padding:6pt;">' + escapeHtml(String(sp.area || '')) + '</td></tr>';
+  });
+  html += '</table></div>';
+  return html;
+}
+
+function buildFinalPlainText() {
+  const paragraphs = getProseParagraphs();
+  let text = paragraphs.join('\n\n');
+  text += '\n\n---\nSPACE PROGRAMME (AI-generated; may have been edited)\n\n';
+  S.aiProgramme.forEach(sp => {
+    text += (sp.name || '') + ': ' + (sp.area || '') + ' sqm\n';
+  });
+  return text;
+}
+
+async function copyFinal() {
+  const html = buildFinalHtml();
+  const plain = buildFinalPlainText();
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      const item = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plain], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([item]);
+      return true;
+    }
+    await navigator.clipboard.writeText(plain);
+    return true;
+  } catch (e) {
+    try { await navigator.clipboard.writeText(plain); return true; } catch (e2) { return false; }
+  }
+}
+
+// ── VIEWS ──────────────────────────────────────────────────────────────────
+function viewStep1() {
+  const wrap = el('div', {});
+  const yc = activeColor();
+
+  const keySet = S.apiKey && S.apiKey.trim().length > 10;
+  const statusBar = el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: keySet ? '#E8F5EE' : '#FFF3E0', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '8px', padding: '8px 12px', marginBottom: '1.25rem' } });
+  statusBar.append(
+    el('span', { style: { fontSize: '12.5px', color: keySet ? '#2E5E3A' : '#7A4500' } }, keySet ? '✓ API key configured' : '⚠ API key not set'),
+    el('button', { style: { background: 'none', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '6px', padding: '4px 10px', fontSize: '12px', cursor: 'pointer', color: keySet ? '#2E5E3A' : '#7A4500', fontFamily: 'inherit' }, onClick: () => set({ view: 'apikey' }) }, keySet ? 'Change' : 'Add')
+  );
+  wrap.appendChild(statusBar);
+
+  const formContainer = el('div', {});
+  renderInputForm(formContainer);
+  wrap.appendChild(formContainer);
+
+  const nextBtn = primaryBtn(
+    el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, el('i', { class: 'ti ti-arrow-right', style: { fontSize: '14px' } }), ' Next: Upload brief'),
+    yc,
+    () => {
+      const errors = [];
+      if (!S.theme.trim()) errors.push('• Studio theme');
+      if (!S.projectTitle.trim()) errors.push('• Brief title');
+      if (!S.intent.trim()) errors.push('• Conceptual intent');
+      if (errors.length > 0) { alert('Please fill in all required fields:\n\n' + errors.join('\n')); return; }
+      set({ step: 2 });
+    },
+    false
+  );
+  wrap.appendChild(nextBtn);
+
+  return wrap;
+}
+
+function viewStep2() {
+  const wrap = el('div', {});
+
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ step: 1 }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Back'),
+      el('span', { class: 'nav-sep' }, '·'),
+      el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, 'Upload your brief')
+    )
+  );
+
+  renderUploadStep(wrap, async () => {
+    set({ analyzing: true, error: '', inconsistencies: [], inconsistencyCount: 0 });
+    try {
+      const inputs = { year: S.year, projectTitle: S.projectTitle, theme: S.theme, intent: S.intent, buildingType: S.buildingType, scale: S.scale, duration: S.duration, site: S.site, notes: S.notes };
+      const raw = await claude(INCONSISTENCY_PROMPT(S.uploadedText, inputs), SYS);
+      const cleaned = raw.replace(/```json|```/g, '').trim();
+      let inconsistencies = [];
+      if (cleaned && cleaned !== '[]') {
+        try { inconsistencies = JSON.parse(cleaned); } catch (e) { inconsistencies = []; }
+      }
+      const count = inconsistencies.length;
+
+      if (count > 0) {
+        set({ inconsistencies: inconsistencies, inconsistencyCount: count, analyzing: false, view: 'inconsistencies' });
+        return;
+      }
+
+      // No inconsistencies — proceed to enhance prose + generate programme in parallel
+      set({ inconsistencies: [], inconsistencyCount: 0, analyzing: false, step: 3, view: null, enhancing: true, programmeLoading: true, error: '' });
+      try {
+        const results = await Promise.all([
+          claude(ENHANCE_PROMPT(S.uploadedText), SYS),
+          claude(PROGRAMME_PROMPT(S.uploadedText, inputs), 'You are an architecture programme consultant. Respond only with raw JSON. No markdown, no preamble.')
+        ]);
+        const enhancedText = results[0];
+        const programmeRaw = results[1];
+
+        let existing = [], generated = [];
+        try {
+          const pcleaned = programmeRaw.replace(/```json|```/g, '').trim();
+          const parsed = JSON.parse(pcleaned);
+          existing = parsed.existing || [];
+          generated = parsed.generated || [];
+        } catch (e) { existing = []; generated = []; }
+
+        set({ result: enhancedText, extractedProgramme: existing, aiProgramme: generated, enhancing: false, programmeLoading: false });
+      } catch (err) {
+        set({ error: err.message, enhancing: false, programmeLoading: false });
+      }
+    } catch (err) {
+      set({ error: err.message, analyzing: false });
+    }
+  });
+
+  return wrap;
+}
+
+function viewInconsistencies() {
+  const wrap = el('div', {});
+
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ step: 2, view: null, inconsistencies: [], inconsistencyCount: 0, error: '' }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Back'),
+      el('span', { class: 'nav-sep' }, '·'),
+      el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, 'Analysis results')
+    )
+  );
+
+  const failBox = el('div', { class: 'warning-box' });
+  failBox.appendChild(el('p', { style: { margin: 0, fontSize: '14px', fontWeight: '600', color: '#cc0000', marginBottom: '8px' } }, '⚠ ' + S.inconsistencyCount + ' critical issue' + (S.inconsistencyCount !== 1 ? 's' : '') + ' found'));
+  failBox.appendChild(el('p', { style: { margin: 0, fontSize: '13px', color: '#7a4400', lineHeight: '1.6' } }, 'Your brief contains critical inconsistencies. Review the flag' + (S.inconsistencyCount !== 1 ? 's' : '') + ' below and fix them. When ready, upload again.'));
+  wrap.appendChild(failBox);
+
+  const panel = el('div', { class: 'inconsistency-panel' });
+  panel.appendChild(el('div', { class: 'inconsistency-header' }, S.inconsistencies.length + ' flag' + (S.inconsistencies.length !== 1 ? 's' : '')));
+
+  const body = el('div', { class: 'inconsistency-body' });
+  S.inconsistencies.forEach(inc => {
+    const item = el('div', { class: 'inconsistency-item' });
+    item.appendChild(el('div', { class: 'inconsistency-title' }, inc.category + ' (critical)'));
+    item.appendChild(el('div', { class: 'inconsistency-note' }, inc.explanation));
+    item.appendChild(el('div', { class: 'inconsistency-passage' }, '"' + inc.passage + '"'));
+    item.appendChild(el('div', { class: 'inconsistency-note', style: { marginTop: '6px', fontWeight: '500', color: 'var(--text)' } }, '→ ' + inc.recommendation));
+    body.appendChild(item);
+  });
+  panel.appendChild(body);
+  wrap.appendChild(panel);
+
+  wrap.appendChild(el('button', { class: 'secondary-btn', style: { width: '100%', marginTop: '1rem', justifyContent: 'center' }, onClick: () => set({ step: 2, view: null, inconsistencies: [], inconsistencyCount: 0, error: '' }) }, el('i', { class: 'ti ti-arrow-left' }), ' Edit and reupload'));
+
+  return wrap;
+}
+
+function viewProgrammeCompare() {
+  const wrap = el('div', {});
+  const yc = activeColor();
+
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ step: 2 }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Back'),
+      el('span', { class: 'nav-sep' }, '·'),
+      el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, 'Review space programme')
+    )
+  );
+
+  if (S.enhancing || S.programmeLoading) {
+    const sp = el('div', { class: 'spinner-wrap' });
+    sp.appendChild(el('div', { class: 'spinner' }));
+    sp.appendChild(document.createTextNode('Preparing your enhanced brief and space programme…'));
+    wrap.appendChild(sp);
+    return wrap;
+  }
+
+  if (S.error) {
+    wrap.appendChild(el('div', { class: 'error-box' }, '⚠ ' + S.error));
+    return wrap;
+  }
+
+  wrap.appendChild(el('div', { class: 'info-note' }, 'Compare what your brief already contains against an AI-generated programme. Edit the AI-generated column as needed — this is what will appear in your final brief.'));
+
+  const grid = el('div', { class: 'compare-grid' });
+
+  // LEFT: extracted/existing (read-only)
+  const leftPanel = el('div', { class: 'programme-panel' });
+  leftPanel.appendChild(el('div', { class: 'programme-header' }, 'From your uploaded brief'));
+  const leftBody = el('div', { class: 'programme-body' });
+  if (S.extractedProgramme.length === 0) {
+    leftBody.appendChild(el('div', { class: 'empty-note' }, 'No existing programme detected in your brief.'));
+  } else {
+    S.extractedProgramme.forEach(sp => {
+      const row = el('div', { class: 'readonly-row' });
+      row.appendChild(el('span', { class: 'readonly-name' }, sp.name || ''));
+      row.appendChild(el('span', { class: 'readonly-area' }, (sp.area || '') + ' sqm'));
+      leftBody.appendChild(row);
+    });
+  }
+  leftPanel.appendChild(leftBody);
+  grid.appendChild(leftPanel);
+
+  // RIGHT: AI-generated (editable)
+  const rightPanel = el('div', { class: 'programme-panel' });
+  rightPanel.appendChild(el('div', { class: 'programme-header' }, 'AI-generated (editable)'));
+  const rightBody = el('div', { class: 'programme-body' });
+
+  S.aiProgramme.forEach((sp, i) => {
+    const row = el('div', { class: 'space-row' });
+    const nameInp = el('input', { type: 'text', placeholder: 'Space name' });
+    nameInp.value = sp.name || '';
+    nameInp.addEventListener('input', e => { S.aiProgramme[i].name = e.target.value; });
+
+    const areaInp = el('input', { type: 'number', placeholder: 'sqm' });
+    areaInp.value = sp.area || '';
+    areaInp.addEventListener('input', e => { S.aiProgramme[i].area = e.target.value; });
+
+    const del = el('button', { class: 'remove-btn', onClick: () => { S.aiProgramme.splice(i, 1); set({}); } }, '×');
+    row.append(nameInp, areaInp, del);
+    rightBody.appendChild(row);
+  });
+
+  rightBody.appendChild(el('button', { class: 'add-space-btn', onClick: () => { S.aiProgramme.push({ name: '', area: '' }); set({}); } }, '+ Add space'));
+  rightPanel.appendChild(rightBody);
+  grid.appendChild(rightPanel);
+
+  wrap.appendChild(grid);
+
+  const regenBtn = el('button', { class: 'secondary-btn', style: { marginBottom: '1rem' }, onClick: async () => {
+    set({ programmeLoading: true, error: '' });
+    try {
+      const inputs = { year: S.year, buildingType: S.buildingType, scale: S.scale, theme: S.theme };
+      const raw = await claude(PROGRAMME_PROMPT(S.uploadedText, inputs), 'You are an architecture programme consultant. Respond only with raw JSON. No markdown, no preamble.');
+      const cleaned = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(cleaned);
+      set({ aiProgramme: parsed.generated || [], programmeLoading: false });
+    } catch (err) {
+      set({ error: 'Could not regenerate programme: ' + err.message, programmeLoading: false });
+    }
+  }}, el('i', { class: 'ti ti-refresh', style: { fontSize: '14px' } }), ' Regenerate AI programme');
+  wrap.appendChild(regenBtn);
+
+  const continueBtn = primaryBtn(
+    el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, el('i', { class: 'ti ti-arrow-right', style: { fontSize: '14px' } }), ' Continue to final brief'),
+    yc,
+    () => set({ step: 4 })
+  );
+  wrap.appendChild(continueBtn);
+
+  return wrap;
+}
+
+function viewFinal() {
+  const wrap = el('div', {});
+  const yc = activeColor();
+
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ step: 3 }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Edit programme')
+    )
+  );
+
+  if (S.error) {
+    wrap.appendChild(el('div', { class: 'error-box' }, '⚠ ' + S.error));
+    return wrap;
+  }
+
+  wrap.appendChild(el('div', { class: 'disclaimer-box' }, '📋 The space programme below was generated by AI based on your inputs and may have been edited by you. It has been incorporated into this final brief — this is clearly noted in the downloaded document as well.'));
+
+  const card = el('div', { class: 'result-card', style: { borderTop: '3px solid ' + yc } });
+  card.appendChild(el('div', { class: 'result-badge', style: { background: yc + '18', color: yc } }, 'Enhanced brief'));
+  card.appendChild(el('div', { class: 'result-body' }, S.result));
+  wrap.appendChild(card);
+
+  const progCard = el('div', { class: 'result-card', style: { borderTop: '3px solid ' + yc } });
+  progCard.appendChild(el('div', { class: 'result-badge', style: { background: yc + '18', color: yc } }, 'Space Programme'));
+  const table = el('table', { class: 'final-table' });
+  table.appendChild(el('tr', {}, el('th', {}, 'Space'), el('th', {}, 'Area (sqm)')));
+  let total = 0;
+  S.aiProgramme.forEach(sp => {
+    total += parseFloat(sp.area) || 0;
+    table.appendChild(el('tr', {}, el('td', {}, sp.name || ''), el('td', {}, String(sp.area || ''))));
+  });
+  progCard.appendChild(table);
+  progCard.appendChild(el('p', { style: { fontSize: '12px', color: 'var(--text3)', marginTop: '8px' } }, S.aiProgramme.length + ' spaces · ' + total.toFixed(0) + ' sqm total'));
+  wrap.appendChild(progCard);
+
+  const copyMainBtn = primaryBtn(
+    el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, el('i', { class: 'ti ti-copy', style: { fontSize: '14px' } }), ' Copy for Word / Google Docs'),
+    yc,
+    async () => {
+      const ok = await copyFinal();
+      alert(ok ? 'Copied — paragraph spacing and the table will be preserved when you paste into Word or Google Docs.' : 'Copy failed — please try again.');
+    }
+  );
+  wrap.appendChild(copyMainBtn);
+
+  const actions = el('div', { style: { display: 'flex', gap: '8px', marginTop: '0.75rem' } });
+  actions.appendChild(el('button', { class: 'secondary-btn', onClick: async () => {
+    set({ result: '', enhancing: true, error: '' });
+    try {
+      const enhanced = await claude(ENHANCE_PROMPT(S.uploadedText), SYS);
+      set({ result: enhanced, enhancing: false });
+    } catch (err) {
+      set({ error: err.message, enhancing: false });
+    }
+  }}, el('i', { class: 'ti ti-refresh' }), ' Regenerate prose'));
+
+  actions.appendChild(el('button', { class: 'secondary-btn', onClick: () => set({
+    step: 1, view: null, result: '', uploadedText: '', uploadFileName: '', projectTitle: '', theme: '', intent: '',
+    buildingType: '', scale: '', duration: '', site: '', notes: '', inconsistencies: [], inconsistencyCount: 0,
+    extractedProgramme: [], aiProgramme: [], error: ''
+  }) }, el('i', { class: 'ti ti-plus' }), ' New brief'));
+
+  wrap.appendChild(actions);
+
+  return wrap;
+}
+
+function viewApiKey() {
+  const wrap = el('div', {});
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ view: null }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Back'),
+      el('span', { class: 'nav-sep' }, '·'),
+      el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, 'API Key Settings')
+    )
+  );
+
+  const infoBox = el('div', { style: { background: '#F0F4FF', border: '0.5px solid #C5D0EE', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1.25rem' } });
+  infoBox.appendChild(el('p', { style: { margin: '0 0 8px', fontSize: '13.5px', fontWeight: '500', color: '#2E3F5C' } }, 'Your Anthropic API key'));
+  infoBox.appendChild(el('p', { style: { margin: 0, fontSize: '13px', color: '#555', lineHeight: '1.65' } }, 'Stored only in your browser. Visit platform.anthropic.com to create one.'));
+  wrap.appendChild(infoBox);
+
+  const keyField = el('div', { class: 'field' });
+  keyField.appendChild(el('label', {}, 'API key'));
+  const keyInp = el('input', { type: 'password', placeholder: 'sk-ant-...' });
+  keyInp.value = S.apiKey || '';
+  keyInp.addEventListener('input', e => { S.apiKey = e.target.value; });
+  keyField.appendChild(keyInp);
+  wrap.appendChild(keyField);
+
+  const saveBtn = el('button', { class: 'primary-btn', style: { background: '#2E3F5C', color: '#fff', marginTop: '4px' }, onClick: () => {
+    const k = S.apiKey.trim();
+    if (!k) { alert('Please enter an API key.'); return; }
+    localStorage.setItem('bb_api_key', k);
+    set({ view: null });
+  }}, 'Save and return');
+  wrap.appendChild(saveBtn);
+
+  return wrap;
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  let view;
+  if (S.view === 'apikey') view = viewApiKey();
+  else if (S.view === 'inconsistencies') view = viewInconsistencies();
+  else if (S.step === 1) view = viewStep1();
+  else if (S.step === 2) view = viewStep2();
+  else if (S.step === 3) view = viewProgrammeCompare();
+  else if (S.step === 4) view = viewFinal();
+  if (view) app.appendChild(view);
+}
+
+render();
+</script>
+</body>
+</html>
