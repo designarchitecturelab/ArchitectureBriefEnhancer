@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brief Builder — Architecture Studio</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --accent: #2E3F5C;
+    --y2: #1D5E8A;
+    --y3: #2E5E3A;
+    --y4: #5C2E2E;
+    --purple: #5C3A7A;
+    --bg: #ffffff;
+    --bg2: #f7f8fa;
+    --bg3: #eef0f3;
+    --text: #1a1a1a;
+    --text2: #555;
+    --text3: #888;
+    --border: #d8dce3;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .shell {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 0.5rem;
+  }
+  .header-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon i { color: #fff; font-size: 17px; }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); }
+  .tagline { font-size: 13.5px; color: var(--text2); line-height: 1.65; margin-bottom: 1rem; }
+  .invite-note {
+    background: #f0f3f7;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  .nav { display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); font-size: 13px; padding: 0;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-sep { color: var(--border); font-size: 13px; }
+
+  /* MODE CARDS */
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .mode-grid { grid-template-columns: 1fr; } }
+  .mode-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .mode-card:hover { background: var(--bg3); }
+  .mode-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .mode-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .mode-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* FORM */
+  .field { margin-bottom: 1.25rem; }
+  .field label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 3px; }
+  .field .hint { font-size: 12px; color: var(--text3); margin: 2px 0 6px; line-height: 1.5; }
+  input[type=text], input[type=number], textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg2);
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(46,63,92,0.1);
+  }
+  textarea { resize: vertical; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* YEAR PILLS */
+  .year-pills { display: flex; gap: 8px; }
+  .year-pill {
+    flex: 1; padding: 8px 6px;
+    border-radius: 8px; font-size: 12px;
+    cursor: pointer; text-align: center;
+    border: 0.5px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    font-weight: 400;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  /* SECTION DIVIDERS */
+  .section-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 2rem 0 1.25rem;
+  }
+  .section-divider span {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3); white-space: nowrap;
+  }
+  .section-divider::before, .section-divider::after {
+    content: ''; flex: 1; height: 0.5px; background: var(--border);
+  }
+  .section-divider::before { display: none; }
+
+  /* STEP INDICATOR - PROGRESS BAR */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 2rem;
+    height: 32px;
+    background: var(--bg2);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 0.5px solid var(--border);
+  }
+  .step-item {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: default;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+  }
+  .step-item:last-child {
+    border-right: none;
+  }
+  .step-item.done {
+    background: var(--accent);
+    color: white;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .step-item.done:last-child {
+    border-right: none;
+  }
+  .step-item.active {
+    background: var(--accent);
+    color: white;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .step-item.active:last-child {
+    border-right: none;
+  }
+  .step-item.future {
+    background: var(--bg2);
+    color: var(--text2);
+  }
+
+  /* PROGRAMME PANEL */
+  .programme-panel {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .programme-header {
+    padding: 0.875rem 1rem;
+    border-bottom: 0.5px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .programme-header span { font-size: 13px; font-weight: 500; }
+  .programme-body { padding: 1rem; }
+  .space-row {
+    display: grid; grid-template-columns: 1fr 100px 80px;
+    gap: 8px; align-items: center; margin-bottom: 8px;
+  }
+  .space-row input { padding: 6px 10px; font-size: 13px; }
+  .space-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-bottom: 4px; }
+  .add-space-btn {
+    background: none; border: 0.5px dashed var(--border);
+    border-radius: 7px; padding: 7px 12px; font-size: 13px;
+    color: var(--text2); cursor: pointer; width: 100%;
+    font-family: inherit; margin-top: 4px;
+    transition: all 0.15s;
+  }
+  .add-space-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .remove-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 18px; padding: 0 4px;
+    line-height: 1; transition: color 0.15s;
+  }
+  .remove-btn:hover { color: #c00; }
+
+  /* REVIEW SCHEDULE */
+  .review-row {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    margin-bottom: 8px;
+  }
+  .review-row.anchor { border-left: 3px solid var(--accent); }
+  .review-week { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+  .review-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .review-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* PRIMARY BUTTON */
+  .primary-btn {
+    width: 100%; padding: 12px 20px;
+    border-radius: 9px; font-size: 14px; font-weight: 600;
+    border: none; display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+    cursor: pointer; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .primary-btn:disabled { cursor: not-allowed; }
+  .secondary-btn {
+    background: none; border: 0.5px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 13px; cursor: pointer;
+    color: var(--text2); display: flex;
+    align-items: center; gap: 6px;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .secondary-btn:hover { background: var(--bg2); color: var(--text); }
+  .action-row { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+
+  /* RESULT CARD */
+  .result-card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    margin-top: 0.5rem;
+  }
+  .result-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 5px; margin-bottom: 8px;
+  }
+  .result-body {
+    font-family: Georgia, serif;
+    font-size: 14.5px; line-height: 1.9;
+    white-space: pre-wrap; color: var(--text);
+  }
+  .result-section { margin-bottom: 1.75rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border); }
+  .result-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .result-meta {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 1.25rem; padding-bottom: 1rem;
+    border-bottom: 0.5px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .meta-pill {
+    font-size: 12px; font-weight: 500;
+    padding: 3px 10px; border-radius: 5px;
+  }
+
+  /* SPINNER */
+  .spinner-wrap { display: flex; align-items: center; gap: 12px; padding: 2.5rem 0; color: var(--text2); font-size: 14px; }
+  .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ERROR */
+  .error-box { background: #fff0f0; border: 0.5px solid #ffcccc; border-radius: 8px; padding: 1rem; font-size: 14px; color: #cc0000; }
+
+  /* TABS */
+  .tab-row { display: flex; gap: 4px; margin-bottom: 1.25rem; background: var(--bg2); padding: 4px; border-radius: 9px; border: 0.5px solid var(--border); }
+  .tab-btn { flex: 1; padding: 7px 8px; border-radius: 6px; font-size: 12.5px; font-weight: 500; cursor: pointer; background: none; border: none; color: var(--text3); font-family: inherit; transition: all 0.15s; }
+  .tab-btn.active { background: white; color: var(--accent); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  /* TOOLTIP BADGE */
+  .info-note { background: #f0f4ff; border: 0.5px solid #c5d0ee; border-radius: 8px; padding: 0.625rem 0.875rem; font-size: 12.5px; color: #3a4a7a; line-height: 1.6; margin-bottom: 1rem; }
+
+  /* COPY BTN */
+  .copy-btn { background: none; border: 0.5px solid var(--border); border-radius: 6px; padding: 5px 12px; font-size: 13px; cursor: pointer; color: var(--text2); display: flex; align-items: center; gap: 6px; font-family: inherit; transition: all 0.15s; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon"><i class="ti ti-pencil"></i></div>
+    <h1>Brief Builder</h1>
+  </div>
+  <p class="tagline">Briefs that invite discovery.</p>
+  <p style="font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">The brief leads the participant on a journey of discovery. The design of a building is merely the vehicle for this journey, not the destination.</p>
+
+  <div id="app"></div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+const S = {
+  view: 'home',
+  projectTitle: '',
+  socialDimension: '',  // Year 5 only
+  genStep: 1,
+  year: '2',
+  theme: '', intent: '', scale: '', duration: '', site: '', notes: '',
+  buildingType: '',
+  spaces: [],
+  programmeLoading: false,
+  programmeGenerated: false,
+  numReviews: 3,
+  reviews: [],
+  reviewsGenerated: false,
+  draft: '',
+  loading: false,
+  result: '',
+  error: '',
+  mode: 'generate',
+  copied: false,
+  resultTab: 'brief',
+  apiKey: localStorage.getItem('bb_api_key') || '',
+};
+
+function set(upd) { Object.assign(S, typeof upd === 'function' ? upd(S) : upd); render(); }
+
+// ─── COLORS ──────────────────────────────────────────────────────────────────
+const YCOLS = { '2': '#1D5E8A', '3': '#2E5E3A', '4': '#5C2E2E', '5': '#4A3728' };
+const PURPLE = '#5C3A7A';
+function activeColor() { return YCOLS[S.year] || '#2E3F5C'; }
+
+// ─── CLAUDE API ──────────────────────────────────────────────────────────────
+const SYS = `You are a gifted writer and expert architecture studio educator. Your task is to write project briefs for undergraduate architecture students that are intellectually alive, deeply conversational, and structured as genuine invitations to participate in architectural thinking — not as documents of compliance.
+
+TONE — THE MOST IMPORTANT INSTRUCTION:
+Write as though you are thinking aloud with the student, as an equal. The brief is not a list of requirements; it is a conversation about why this territory matters. Begin with observation, not announcement. Start with what is happening in the world, what people are noticing, what questions are arising — before you name the studio theme.
+
+Address students directly and warmly using "you". Use "we" occasionally to signal shared inquiry. Never use the words "mandatory", "required", "assessed", or "deadline" in the brief text itself. Frame every expectation as an intellectual opportunity. Write "The real questions you must grapple with are..." not "You are required to address..."
+
+The tone should feel intimate without being casual — the voice of someone who has thought deeply about this territory and wants to invite the student into that thinking.
+
+LANGUAGE — NON-NEGOTIABLE:
+Write in flowing prose throughout. No bullet points anywhere in the body of the brief itself, except in the FRAMEWORK & INQUIRY section where bullets may aid clarity. No numbered lists. Prose only — the kind that rewards careful reading.
+
+Use a vocabulary that is precise and unhurried. Reach for the word that is exactly right: "palimpsest" rather than "layers", "liminal" rather than "in-between", "quotidian" rather than "everyday" — but only where the word is genuinely the right one, not as decoration. Do not be flamboyant, but do not be timid. If a student occasionally needs to reach for a dictionary, that is not a failure; it is an invitation to a richer understanding.
+
+LENGTH AND STRUCTURE — CRITICAL:
+The entire brief should be roughly 1–1.5 pages when printed. The introduction must be no more than 150 words across two short paragraphs. Every other paragraph should be 3–5 sentences maximum. Write for a reader who will not re-read. Every sentence must earn its place. Brevity is rigour.
+
+STRUCTURE OF THE BRIEF:
+
+1. INTRODUCTION (two paragraphs, ~150 words max)
+Begin with a real-world observation, problem, or condition — something happening in the world that makes this territory matter. Not "the theme of this studio is..." but "We have noticed..." or "Recent events raise questions about..." The second paragraph introduces the building type and site in a way that makes their relevance feel inevitable, not assigned. Do not state the connection explicitly; let the reader feel it.
+
+2. FRAMEWORK & INQUIRY
+This section unifies three intellectual dimensions. It frames all the thinking the studio demands:
+   a) Objectives (what the studio invites the student to understand) — written in prose as intellectual opportunities, not requirements. Bullets may be used here for clarity if needed.
+   b) Architectural Programme (what ideas must the student grapple with? what are the intellectual demands? what disciplinary conversations does this project enter?) — prose, 2–3 paragraphs.
+   c) Territory of Inquiry (thematic landscape: the ideas, tensions, conversations this project enters; point outward to philosophy, ecology, anthropology, culture, material practice; reference canonical buildings or thinkers where they illuminate) — prose and/or bullets where clarity demands, 2–3 paragraphs.
+
+3. POINTS TO PONDER (distinct section)
+Begin with one charged paragraph — a paradox, an unresolved condition, a question with no easy answer. This sets the intellectual temperature. Then follow with three to five genuine, unanswerable questions. These are not tasks or prompts; they are questions the student *must* sit with. They should resist easy answers and open onto deeper territory. Phrase them as real questions: "Does the presence of fragments serve any purpose, or should they be removed?" not "Explore the question of fragments." Together, these form a unified space for genuine wondering.
+
+5. SPACE PROGRAMME / PROGRAMME OF ACTIVITIES
+Name the spaces, activities, or functional areas the project requires. For Years 2–4: include proposed areas in sqm with qualitative notes on relationships and character. For Year 5: list activity categories without areas; the student determines areas based on their interpretation. Present as a clean, professional table.
+
+6. REVIEW SCHEDULE (if provided by faculty)
+Present as a clean table with columns: Week | Review | What's Ready | Questions This Review Opens. Include weightages if provided.
+
+7. DELIVERABLES
+Framed as evidence of thinking, not compliance. What will the student have produced, and what will those productions reveal about their understanding? Written in prose.
+
+8. NOTE FOR TEACHER (boxed, distinct visual treatment)
+Three honest questions the teacher should ask before releasing this brief. One must address whether the tone is genuinely invitational. One must ask whether the brief avoids having a single "correct" answer. One must ask whether the teacher would be excited — not merely satisfied — by the range of responses it might produce. Addressed to the teacher only. Clear visual distinction. Written in prose.
+
+YEAR CALIBRATION:
+- Year 2 — Awakening: Wide aperture. Close to the body and senses. Exploration is celebrated. The tone is warm and encouraging. The student is learning that architecture is a form of thought.
+- Year 3 — Exploration: More friction. Students take a position and defend it — framed as a privilege. Technical rigour and conceptual ambition held together. Confidence in decision-making begins to emerge.
+- Year 4 — Expansion: Multiple systems in conversation. Complexity increases. The brief assumes growing sophistication. Near-peers in shared inquiry.
+- Year 5 — Integration: Thesis. The student defines their own architectural argument. The brief becomes permission and provocation in equal measure. The tone is that of a final conversation between equals.
+
+YEAR 5 SOCIAL DIMENSION (Optional):
+If the faculty has provided a social or ethical concern they want the studio to surface, weave it into the Introduction and Territory of Inquiry naturally — not as ideology, but as a genuine dimension of what it means to design this building type in this place at this time. This should feel like a real question the teacher is wondering about, not a moral lesson. It is enough to raise awareness and speak about it; you need not resolve it.
+
+PROJECT TITLE:
+The title should reflect the intellectual intent or core idea of the studio, not just the building type. Example: "Civic Space in a Park — Bridging Eras" rather than "Museum". The title becomes the heading of the output brief.
+
+PRECEDENT AND REFERENCE PRACTICE:
+When referencing precedent buildings, architects, or thinkers, prioritise local and regional voices first. For an Indian context: Balkrishna Doshi, Charles Correa, Laurie Baker, Anupama Kundoo, Nari Gandhi, Achyut Kanvinde, B.V. Doshi, and contemporary practitioners working regionally should appear as primary references. If the studio brief mentions a specific region, climate, or cultural context, reach for precedents from that region first — they have often solved the exact problems the student encounters. International canonical references should support and illuminate local knowledge, never replace it. This practice decolonises the architectural discourse students inherit.
+
+`;
+
+async function claude(prompt, sys) {
+  const key = S.apiKey.trim();
+  if (!key) throw new Error('No API key set. Please add your Anthropic API key in Settings.');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1500,
+      system: sys || SYS,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.content?.find(b => b.type === 'text')?.text || '';
+}
+
+// ─── PROMPTS ─────────────────────────────────────────────────────────────────
+function genBriefPrompt() {
+  const prog = S.spaces.length > 0
+    ? '\nSPACE PROGRAMME (proposed — faculty may edit areas; if blank for Year 5, student determines areas):\n' +
+      S.spaces.map(sp => {
+        if (S.year === '5') {
+          return `- ${sp.name}${sp.notes ? ' — '+sp.notes : ''}`;
+        } else {
+          return `- ${sp.name}: ${sp.area} sqm${sp.notes ? ' — '+sp.notes : ''}`;
+        }
+      }).join('\n')
+    : '';
+  const revs = S.reviews.length > 0
+    ? '\nREVIEW SCHEDULE (set — reference naturally in the deliverables section):\n' +
+      S.reviews.map(r => `- Week ${r.week}: ${r.name}`).join('\n')
+    : '';
+  const social = S.socialDimension && S.year === '5'
+    ? `\nSOCIAL/ETHICAL DIMENSION (to weave into Introduction and Territory of Inquiry):\n${S.socialDimension}`
+    : '';
+  return `Write a complete architecture project brief using these studio inputs. Follow the system instructions precisely — particularly regarding prose structure, combined Framework & Inquiry section, The Central Question, Points to Ponder questions, and conversational tone. Your brief should read like a thinking teacher inviting a student into shared inquiry.
+
+PROJECT TITLE (for brief heading): ${S.projectTitle || 'Not provided'}
+Year level: ${S.year} (${S.year=='2'?'Year 2 — Awakening: wide aperture, close to senses, warm and exploratory':S.year=='3'?'Year 3 — Exploration: friction, take a position, technical and conceptual together':S.year=='4'?'Year 4 — Expansion: complexity, multiple systems in conversation, collegial':'Year 5 — Integration: thesis as synthesis, student-defined argument, permission and provocation'})
+Studio theme: ${S.theme}
+Conceptual intent: ${S.intent}
+Building type: ${S.buildingType || 'not specified — keep the programme open and generative'}
+Project scale: ${S.scale || 'not specified'}
+Duration: ${S.duration || 'not specified'}
+Site or context: ${S.site || 'open — do not constrain'}
+Additional notes: ${S.notes || 'none'}
+${prog}${revs}${social}
+
+The brief must have these sections in this order:
+1. INTRODUCTION (two paragraphs, ~150 words max)
+2. FRAMEWORK & INQUIRY (combining Objectives, Architectural Programme, and Territory of Inquiry as one unified intellectual framing)
+3. POINTS TO PONDER (one charged central question followed by 3–5 genuine, unanswerable questions — a unified space for wondering)
+4. SPACE PROGRAMME / PROGRAMME OF ACTIVITIES
+5. REVIEW SCHEDULE (if provided)
+6. DELIVERABLES
+7. NOTE FOR TEACHER (boxed, teacher-only, three questions about the brief)
+
+The FRAMEWORK & INQUIRY section unifies three dimensions:
+- Objectives (what the studio invites students to understand) in prose
+- Architectural Programme (conceptual demands, intellectual territory) in prose
+- Territory of Inquiry (thematic landscape, ideas, tensions, conversations) in prose and/or bullets where clarity demands
+
+The Introduction should begin with a real observation or problem in the world that makes this territory matter.
+
+POINTS TO PONDER contains real questions, not prompts: "Does the presence of fragments serve any purpose?" not "Explore the relationship between fragments and memory."
+
+The Note for Teacher must be visually distinct and clearly addressed to the teacher only — not for students to see.`;
+}
+
+function progPrompt() {
+  return `You are an experienced architecture programme consultant. Generate a realistic space programme as a raw JSON array only — no preamble, no explanation, no markdown fences.
+
+Building type: ${S.buildingType}
+Project scale: ${S.scale || 'not specified — make a reasonable assumption'}
+Year level: Year ${S.year} undergraduate architecture
+Studio theme: ${S.theme || 'general architecture studio'}
+
+Each item: { "name": "Space name", "area": number in sqm, "notes": "one short qualitative phrase about character or relationship" }
+
+8 to 14 spaces. A mix of primary, secondary, and service spaces. Notes should be evocative rather than technical — "a room that holds both noise and silence", "the transition between public life and private work". Total area appropriate to stated scale. The programme is a starting point, not a constraint.`;
+}
+
+function reviewPrompt() {
+  const weeks = parseInt(S.duration) || 12;
+  const num = Math.max(3, parseInt(S.numReviews) || 3);
+  return `Generate an intermediate review schedule as a raw JSON array only — no preamble, no markdown fences.
+
+Total duration: ${weeks} weeks
+Number of reviews: ${num} (minimum 3)
+Year level: Year ${S.year} undergraduate architecture
+Studio theme: ${S.theme || 'general architecture studio'}
+
+The first three reviews must always be:
+1. Initial Response — students present their reading of context, site, and programme. Questions are opened, not answered.
+2. Schematic Design — the spatial idea is tested at building scale. Structure, section, and relationship to site are emerging.
+3. Design Development — a more resolved proposal in which spatial, structural, and environmental logic are beginning to work together.
+
+If more than 3 reviews are requested, add meaningful ones between or after these anchors — named for what that moment of design thinking demands.
+
+Format: [{ "name": "Review name", "week": number, "desc": "2 to 3 sentences on what should be ready and what questions this review should open", "anchor": true or false }]
+
+Distribute weeks thoughtfully. Early reviews cluster in the first half; resolution needs time.`;
+}
+
+// ─── SECTION PARSER ──────────────────────────────────────────────────────────
+const KEYS = [
+  ['INTRODUCTION','Introduction'],
+  ['FRAMEWORK & INQUIRY','Framework & Inquiry'],
+  ['POINTS TO PONDER','Points to Ponder'],
+  ['SPACE PROGRAMME','Space Programme'],
+  ['PROGRAMME OF ACTIVITIES','Programme of Activities'],
+  ['REVIEW SCHEDULE','Review Schedule'],
+  ['DELIVERABLES','Deliverables'],
+  ['NOTE FOR TEACHER','Note for Teacher'],
+];
+
+function parseSections(text) {
+  const parts = [];
+  let rem = text;
+  while (rem.length > 0) {
+    let earliest = -1, eLabel = null, eLen = 0;
+    for (const [k, l] of KEYS) {
+      const re = new RegExp(`(?:^|\\n)\\**(?:\\d+\\.\\s*)?${k}[:\\s\\-—\\*]*`, 'i');
+      const m = rem.search(re);
+      if (m !== -1 && (earliest === -1 || m < earliest)) {
+        const match = rem.match(re);
+        earliest = m; eLabel = l; eLen = match[0].length;
+      }
+    }
+    if (earliest === -1) { parts.push({ label: null, text: rem.trim() }); break; }
+    if (earliest > 0) parts.push({ label: null, text: rem.slice(0, earliest).trim() });
+    rem = rem.slice(earliest + eLen);
+    let nextSec = -1;
+    for (const [k2] of KEYS) {
+      const re2 = new RegExp(`(?:^|\\n)\\**(?:\\d+\\.\\s*)?${k2}[:\\s\\-—\\*]*`, 'i');
+      const m2 = rem.search(re2);
+      if (m2 !== -1 && (nextSec === -1 || m2 < nextSec)) nextSec = m2;
+    }
+    parts.push({ label: eLabel, text: (nextSec === -1 ? rem : rem.slice(0, nextSec)).trim() });
+    rem = nextSec === -1 ? '' : rem.slice(nextSec);
+  }
+  return parts;
+}
+
+// ─── RENDER HELPERS ──────────────────────────────────────────────────────────
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) Object.entries(attrs).forEach(([k, v]) => {
+    if (k === 'style' && typeof v === 'object') Object.assign(e.style, v);
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'class') e.className = v;
+    else e.setAttribute(k, v);
+  });
+  children.flat(Infinity).forEach(c => {
+    if (c == null || c === false) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+function icon(name, style = {}) {
+  const i = document.createElement('i');
+  i.className = `ti ${name}`;
+  i.setAttribute('aria-hidden', 'true');
+  Object.assign(i.style, { fontSize: '16px', ...style });
+  return i;
+}
+
+function navBar(label, backFn, extras = []) {
+  const d = el('div', { class: 'nav' });
+  const back = el('button', { class: 'nav-btn', onClick: backFn }, icon('ti-arrow-left', { fontSize: '14px' }), ' Back');
+  const sep = el('span', { class: 'nav-sep' }, '·');
+  const lbl = el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, label);
+  d.append(back, sep, lbl);
+  extras.forEach(e => d.appendChild(e));
+  return d;
+}
+
+function primaryBtn(text, color, onClick, disabled = false) {
+  const b = el('button', {
+    class: 'primary-btn',
+    onClick,
+    style: {
+      background: disabled ? 'var(--bg3)' : color,
+      color: disabled ? 'var(--text3)' : '#fff',
+    }
+  }, text);
+  if (disabled) b.disabled = true;
+  return b;
+}
+
+function sectionDiv(title) {
+  const d = el('div', { class: 'section-divider' });
+  d.appendChild(el('span', {}, title));
+  return d;
+}
+
+function field(labelText, hint, inputEl) {
+  const d = el('div', { class: 'field' });
+  d.appendChild(el('label', {}, labelText));
+  if (hint) d.appendChild(el('p', { class: 'hint' }, hint));
+  d.appendChild(inputEl);
+  return d;
+}
+
+function textInput(placeholder, value, key) {
+  const inp = el('input', { type: 'text', placeholder });
+  inp.value = value || '';
+  // Write directly to S — no render(), no focus loss
+  inp.addEventListener('input', e => { S[key] = e.target.value; });
+  return inp;
+}
+
+function textArea(placeholder, value, key, minH = 90) {
+  const ta = el('textarea', { placeholder, style: { minHeight: minH + 'px' } });
+  ta.value = value || '';
+  // Write directly to S — no render(), no focus loss
+  ta.addEventListener('input', e => { S[key] = e.target.value; });
+  return ta;
+}
+
+// ─── VIEWS ────────────────────────────────────────────────────────────────────
+
+function viewHome() {
+  const wrap = el('div', {});
+
+  // API key status bar
+  const keySet = S.apiKey && S.apiKey.trim().length > 10;
+  const statusBar = el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: keySet ? '#E8F5EE' : '#FFF3E0', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '8px', padding: '8px 12px', marginBottom: '1.5rem' } });
+  const statusText = el('span', { style: { fontSize: '12.5px', color: keySet ? '#2E5E3A' : '#7A4500' } },
+    keySet ? '✓ API key configured — ready to generate' : '⚠ API key not set — add it in Settings before generating');
+  const settingsBtn = el('button', {
+    style: { background: 'none', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '6px', padding: '4px 10px', fontSize: '12px', cursor: 'pointer', color: keySet ? '#2E5E3A' : '#7A4500', fontFamily: 'inherit' },
+    onClick: () => set({ view: 'apikey' })
+  }, keySet ? 'Change key' : 'Add API key');
+  statusBar.append(statusText, settingsBtn);
+  wrap.appendChild(statusBar);
+
+  // Redirect to generate
+  setTimeout(() => set({ view: 'generate' }), 0);
+  return wrap;
+}
+
+function viewApiKey() {
+  const wrap = el('div', {});
+  wrap.appendChild(navBar('API Key Settings', () => set({ view: 'home' })));
+
+  const infoBox = el('div', { style: { background: '#F0F4FF', border: '0.5px solid #C5D0EE', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1.25rem' } });
+  infoBox.appendChild(el('p', { style: { margin: '0 0 8px', fontSize: '13.5px', fontWeight: '500', color: '#2E3F5C' } }, 'Your Anthropic API key'));
+  infoBox.appendChild(el('p', { style: { margin: 0, fontSize: '13px', color: '#555', lineHeight: '1.65' } }, 'Your key is stored only in this browser on this device. It is never sent anywhere except directly to Anthropic when generating a brief. To get a key, visit platform.anthropic.com and create one under API Keys.'));
+  wrap.appendChild(infoBox);
+
+  const keyField = el('div', { class: 'field' });
+  keyField.appendChild(el('label', {}, 'API key'));
+  keyField.appendChild(el('p', { class: 'hint' }, 'Begins with sk-ant-api...'));
+  const keyInp = el('input', { type: 'password', placeholder: 'sk-ant-api03-...' });
+  keyInp.value = S.apiKey || '';
+  keyInp.addEventListener('input', e => { S.apiKey = e.target.value; });
+  keyField.appendChild(keyInp);
+  wrap.appendChild(keyField);
+
+  const saveBtn = el('button', {
+    class: 'primary-btn',
+    style: { background: '#2E3F5C', color: '#fff', marginTop: '4px' },
+    onClick: () => {
+      const k = S.apiKey.trim();
+      if (!k) { alert('Please enter an API key.'); return; }
+      localStorage.setItem('bb_api_key', k);
+      set({ view: 'home' });
+    }
+  }, 'Save key and return');
+  wrap.appendChild(saveBtn);
+
+  if (S.apiKey) {
+    const clearBtn = el('button', {
+      class: 'secondary-btn',
+      style: { marginTop: '10px', width: '100%', justifyContent: 'center', color: '#c00', borderColor: '#ffcccc' },
+      onClick: () => {
+        if (confirm('Remove the saved API key?')) {
+          localStorage.removeItem('bb_api_key');
+          S.apiKey = '';
+          set({ view: 'home' });
+        }
+      }
+    }, 'Remove saved key');
+    wrap.appendChild(clearBtn);
+  }
+  return wrap;
+}
+
+
+function viewGenerate() {
+  const wrap = el('div', {});
+  const yc = YCOLS[S.year] || '#2E3F5C';
+
+  // Steps indicator
+  const steps = el('div', { class: 'steps' });
+  const stepLabels = ['Project', 'Programme', 'Schedule'];
+  stepLabels.forEach((s, i) => {
+    const stepNum = i + 1;
+    const active = S.genStep === stepNum;
+    const done = S.genStep > stepNum;
+    steps.appendChild(el('div', {
+      class: 'step-item' + (active ? ' active' : done ? ' done' : ' future')
+    }, s));
+  });
+  wrap.appendChild(steps);
+
+  // ── STEP 1: Studio info ──
+  if (S.genStep === 1) {
+    wrap.appendChild(navBar('Project', () => set({ view: 'home' })));
+
+    // Year level
+    const yearWrap = el('div', { class: 'field' });
+    yearWrap.appendChild(el('label', {}, 'Year level'));
+    yearWrap.appendChild(el('p', { class: 'hint' }, 'Select the level of the students you want to address'));
+    const pills = el('div', { class: 'year-pills' });
+    [['2', '2nd Year', 'Awakening'], ['3', '3rd Year', 'Exploration'], ['4', '4th Year', 'Expansion'], ['5', '5th Year', 'Integration']].forEach(([v, year, stage]) => {
+      const c = YCOLS[v]; const active = S.year === v;
+      const b = el('button', {
+        class: 'year-pill',
+        onClick: () => set({ year: v }),
+        style: {
+          border: active ? `2px solid ${c}` : '0.5px solid var(--border)',
+          background: active ? c + '14' : 'var(--bg2)',
+          color: active ? c : 'var(--text2)',
+          fontWeight: active ? '600' : '400',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '2px',
+          lineHeight: '1.3'
+        }
+      }, 
+        el('div', { style: { fontSize: '13px', fontWeight: 'inherit' } }, year),
+        el('div', { style: { fontSize: '11px', fontWeight: '400', opacity: '0.85' } }, stage)
+      );
+      pills.appendChild(b);
+    });
+    yearWrap.appendChild(pills);
+    wrap.appendChild(yearWrap);
+
+    wrap.appendChild(field('Studio theme *', 'Enter the theme from the syllabus for this semester.',
+      textInput('e.g. Climatic conditions and architectural design', S.theme, 'theme')));
+
+    wrap.appendChild(field('Building type', 'Enter the building type or typology (optional but recommended for automatic programme generation).',
+      textInput('e.g. Community library, Cultural centre, Neighbourhood clinic', S.buildingType, 'buildingType')));
+
+    wrap.appendChild(field('Brief title *', 'Enter a title that reflects the intellectual intent of the studio, not the building type.',
+      textInput('e.g. Civic Space in a Park — Bridging Eras', S.projectTitle, 'projectTitle')));
+
+    wrap.appendChild(field('Conceptual intent *', 'Describe the central question this studio is built around. Make it rich and specific.',
+      textArea('e.g. Students should understand climate not as an engineering problem but as a philosophical one…', S.intent, 'intent', 110)));
+
+    const twoCol = el('div', { class: 'two-col' });
+    twoCol.appendChild(field('Approximate scale', 'Enter the approximate area in square metres.',
+      textInput('e.g. 500 sqm', S.scale, 'scale')));
+    twoCol.appendChild(field('Total duration', 'Enter the total duration in weeks.',
+      textInput('e.g. 12 weeks', S.duration, 'duration')));
+    wrap.appendChild(twoCol);
+
+    wrap.appendChild(field('Site or context', 'Describe the site or context (optional; leave blank for an open brief).',
+      textInput('e.g. Mediterranean coastal town', S.site, 'site')));
+
+    wrap.appendChild(field('Additional notes', 'Note any specific emphases, constraints, or values this studio should embody (optional).',
+      textArea('e.g. Strong emphasis on vernacular precedent in the first four weeks', S.notes, 'notes', 70)));
+
+    // Read S directly at click time — not at render time
+    const btn = primaryBtn(
+      el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, icon('ti-arrow-right'), ' Next: Space Programme'),
+      yc,
+      () => {
+        if (!S.theme.trim() || !S.intent.trim()) { alert('Please enter a studio theme and conceptual intent before continuing.'); return; }
+        set({ genStep: 2 });
+      }
+    );
+    wrap.appendChild(btn);
+  }
+
+  // ── STEP 2: Space programme ──
+  if (S.genStep === 2) {
+    wrap.appendChild(navBar('Programme', () => set({ genStep: 1 })));
+
+    if (!S.buildingType) {
+      const note = el('div', { class: 'info-note' }, icon('ti-info-circle', { fontSize: '14px', verticalAlign: '-2px', marginRight: '6px' }), ' No building type was entered — you can add spaces manually below, or go back and enter one to generate a programme automatically.');
+      wrap.appendChild(note);
+    } else {
+      const genBtn = el('button', {
+        class: 'secondary-btn',
+        style: { marginBottom: '1rem', background: yc + '0D', borderColor: yc + '40', color: yc },
+        onClick: async () => {
+          set({ programmeLoading: true });
+          try {
+            const raw = await claude(progPrompt(), 'You are an architecture programme consultant. Respond only with a raw JSON array. No markdown, no explanation.');
+            const cleaned = raw.replace(/```json|```/g, '').trim();
+            const spaces = JSON.parse(cleaned);
+            set({ spaces, programmeLoading: false, programmeGenerated: true });
+          } catch (e) {
+            alert('Could not generate programme: ' + e.message);
+            set({ programmeLoading: false });
+          }
+        }
+      }, icon('ti-sparkles', { fontSize: '14px', color: yc }), ` Generate programme for: ${S.buildingType}`);
+      wrap.appendChild(genBtn);
+    }
+
+    if (S.programmeLoading) {
+      const sp = el('div', { class: 'spinner-wrap' });
+      sp.appendChild(el('div', { class: 'spinner' }));
+      sp.appendChild(document.createTextNode('Generating space programme…'));
+      wrap.appendChild(sp);
+    }
+
+    if (S.spaces.length > 0) {
+      const panel = el('div', { class: 'programme-panel' });
+      const ph = el('div', { class: 'programme-header' });
+      const totalArea = S.spaces.reduce((a, sp) => a + (parseFloat(sp.area) || 0), 0);
+      ph.appendChild(el('span', {}, `${S.spaces.length} spaces · ${totalArea.toFixed(0)} sqm total`));
+      const addBtn = el('button', {
+        class: 'nav-btn',
+        onClick: () => { S.spaces.push({ name: '', area: '', notes: '' }); set({}); }
+      }, icon('ti-plus', { fontSize: '14px' }), ' Add space');
+      ph.appendChild(addBtn);
+      panel.appendChild(ph);
+
+      const body = el('div', { class: 'programme-body' });
+      const hdr = el('div', { class: 'space-row' });
+      ['Space name', 'Area (sqm)', ''].forEach(h => hdr.appendChild(el('div', { class: 'space-label' }, h)));
+      body.appendChild(hdr);
+
+      S.spaces.forEach((sp, i) => {
+        const row = el('div', { class: 'space-row' });
+        const nameInp = el('input', { type: 'text', placeholder: 'Space name' });
+        nameInp.value = sp.name;
+        nameInp.addEventListener('input', e => { S.spaces[i].name = e.target.value; });
+
+        const areaInp = el('input', { type: 'number', placeholder: 'sqm' });
+        areaInp.value = sp.area;
+        areaInp.addEventListener('input', e => { S.spaces[i].area = e.target.value; });
+
+        const del = el('button', { class: 'remove-btn', onClick: () => { S.spaces.splice(i, 1); set({}); } }, '×');
+        row.append(nameInp, areaInp, del);
+        body.appendChild(row);
+
+        if (sp.notes) {
+          const noteRow = el('div', { style: { gridColumn: '1/-1', paddingLeft: '2px', marginBottom: '6px' } });
+          const noteInp = el('input', { type: 'text', placeholder: 'Notes (optional)', style: { fontSize: '12px', color: 'var(--text2)' } });
+          noteInp.value = sp.notes;
+          noteInp.addEventListener('input', e => { S.spaces[i].notes = e.target.value; });
+          noteRow.appendChild(noteInp);
+          body.appendChild(noteRow);
+        }
+      });
+
+      const addRowBtn = el('button', {
+        class: 'add-space-btn',
+        onClick: () => { S.spaces.push({ name: '', area: '', notes: '' }); set({}); }
+      }, '+ Add another space');
+      body.appendChild(addRowBtn);
+      panel.appendChild(body);
+      wrap.appendChild(panel);
+    } else if (!S.programmeLoading) {
+      const emptyPanel = el('div', { class: 'programme-panel' });
+      const emptyBody = el('div', { class: 'programme-body', style: { textAlign: 'center', padding: '2rem' } });
+      emptyBody.appendChild(el('p', { style: { color: 'var(--text3)', fontSize: '13px', marginBottom: '12px' } }, 'No spaces yet. Generate a programme above or add spaces manually.'));
+      const addFirst = el('button', {
+        class: 'add-space-btn',
+        onClick: () => { S.spaces.push({ name: '', area: '', notes: '' }); set({}); }
+      }, '+ Add a space manually');
+      emptyBody.appendChild(addFirst);
+      emptyPanel.appendChild(emptyBody);
+      wrap.appendChild(emptyPanel);
+    }
+
+    const nextBtn = primaryBtn(
+      el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, icon('ti-arrow-right'), ' Next: Review Schedule'),
+      yc,
+      () => set({ genStep: 3 })
+    );
+    wrap.appendChild(nextBtn);
+    if (S.spaces.length === 0) {
+      const skip = el('button', { class: 'secondary-btn', style: { width: '100%', marginTop: '8px', justifyContent: 'center' }, onClick: () => set({ genStep: 3 }) }, 'Skip — no programme');
+      wrap.appendChild(skip);
+    }
+  }
+
+  // ── STEP 3: Review schedule ──
+  if (S.genStep === 3) {
+    wrap.appendChild(navBar('Schedule', () => set({ genStep: 2 })));
+
+    const infoNote = el('div', { class: 'info-note' }, 'The first three reviews are always fixed anchors: Initial Response, Schematic Design, and Design Development. Additional reviews are distributed meaningfully across the remaining weeks.');
+    wrap.appendChild(infoNote);
+
+    const twoCol = el('div', { class: 'two-col' });
+
+    const durField = el('div', { class: 'field' });
+    durField.appendChild(el('label', {}, 'Duration (weeks)'));
+    const durInp = el('input', { type: 'number', placeholder: '12' });
+    durInp.value = S.duration ? parseInt(S.duration) || '' : '';
+    durInp.addEventListener('input', e => { S.duration = e.target.value; });
+    durField.appendChild(durInp);
+    twoCol.appendChild(durField);
+
+    const numField = el('div', { class: 'field' });
+    numField.appendChild(el('label', {}, 'Number of reviews'));
+    numField.appendChild(el('p', { class: 'hint' }, 'Minimum 3'));
+    const numInp = el('input', { type: 'number', placeholder: '3' });
+    numInp.value = S.numReviews || 3;
+    numInp.min = '3';
+    numInp.addEventListener('input', e => { S.numReviews = Math.max(3, parseInt(e.target.value) || 3); });
+    numField.appendChild(numInp);
+    twoCol.appendChild(numField);
+    wrap.appendChild(twoCol);
+
+    const genRevBtn = el('button', {
+      class: 'secondary-btn',
+      style: { marginBottom: '1.25rem', background: yc + '0D', borderColor: yc + '40', color: yc },
+      onClick: async () => {
+        set({ programmeLoading: true, reviews: [] });
+        try {
+          const raw = await claude(reviewPrompt(), 'You are an architecture studio coordinator. Respond only with a raw JSON array. No markdown, no explanation, no preamble.');
+          const cleaned = raw.replace(/```json|```/g, '').trim();
+          const reviews = JSON.parse(cleaned);
+          set({ reviews, programmeLoading: false, reviewsGenerated: true });
+        } catch (e) {
+          alert('Could not generate schedule: ' + e.message);
+          set({ programmeLoading: false });
+        }
+      }
+    }, icon('ti-calendar', { fontSize: '14px', color: yc }), ' Generate review schedule');
+    wrap.appendChild(genRevBtn);
+
+    if (S.programmeLoading) {
+      const sp = el('div', { class: 'spinner-wrap' });
+      sp.appendChild(el('div', { class: 'spinner' }));
+      sp.appendChild(document.createTextNode('Building review schedule…'));
+      wrap.appendChild(sp);
+    }
+
+    if (S.reviews.length > 0) {
+      S.reviews.forEach(r => {
+        const row = el('div', { class: 'review-row' + (r.anchor ? ' anchor' : '') });
+        row.appendChild(el('div', { class: 'review-week' }, `Week ${r.week}`));
+        row.appendChild(el('div', { class: 'review-name' }, r.name + (r.anchor ? ' ★' : '')));
+        row.appendChild(el('div', { class: 'review-desc' }, r.desc));
+        wrap.appendChild(row);
+      });
+    }
+
+    const generateBriefBtn = primaryBtn(
+      el('span', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, icon('ti-sparkles'), ' Generate complete brief ↗'),
+      yc,
+      async () => {
+        set({ view: 'result', loading: true, result: '', error: '' });
+        try { const t = await claude(genBriefPrompt()); set({ result: t, loading: false }); }
+        catch (e) { set({ error: e.message, loading: false }); }
+      }
+    );
+    wrap.appendChild(el('div', { style: { marginTop: '1.5rem' } }, generateBriefBtn));
+
+    if (S.reviews.length === 0) {
+      const skip = el('button', {
+        class: 'secondary-btn',
+        style: { width: '100%', marginTop: '8px', justifyContent: 'center' },
+        onClick: async () => {
+          set({ view: 'result', loading: true, result: '', error: '' });
+          try { const t = await claude(genBriefPrompt()); set({ result: t, loading: false }); }
+          catch (e) { set({ error: e.message, loading: false }); }
+        }
+      }, 'Skip reviews — generate brief now');
+      wrap.appendChild(skip);
+    }
+  }
+
+  return wrap;
+}
+
+function viewResult() {
+  const ac = activeColor();
+  const wrap = el('div', {});
+
+  // top bar
+  const topBar = el('div', { class: 'top-bar' });
+  const leftNav = el('div', { class: 'nav' });
+  const backBtn = el('button', { class: 'nav-btn', onClick: () => set({ view: 'generate', genStep: 3, loading: false }) },
+    icon('ti-arrow-left', { fontSize: '14px' }), ' Edit inputs');
+  const sep = el('span', { class: 'nav-sep' }, '·');
+  const newBtn = el('button', { class: 'nav-btn', onClick: () => set({ view: 'home', result: '', error: '', genStep: 1, spaces: [], reviews: [], theme: '', intent: '', draft: '' }) }, 'Start over');
+  leftNav.append(backBtn, sep, newBtn);
+  topBar.appendChild(leftNav);
+
+  if (S.result) {
+    const copyBtn = el('button', { class: 'copy-btn', onClick: () => {
+      navigator.clipboard.writeText(fullExport()).then(() => {
+        copyBtn.innerHTML = '';
+        copyBtn.appendChild(icon('ti-check', { fontSize: '14px', color: ac }));
+        copyBtn.appendChild(document.createTextNode(' Copied'));
+        copyBtn.style.color = ac;
+        setTimeout(() => { copyBtn.innerHTML = ''; copyBtn.appendChild(icon('ti-copy', { fontSize: '14px' })); copyBtn.appendChild(document.createTextNode(' Copy all')); copyBtn.style.color = 'var(--text2)'; }, 2000);
+      });
+    }}, icon('ti-copy', { fontSize: '14px' }), ' Copy all');
+    topBar.appendChild(copyBtn);
+  }
+  wrap.appendChild(topBar);
+
+  if (S.loading) {
+    const sp = el('div', { class: 'spinner-wrap' });
+    sp.appendChild(el('div', { class: 'spinner' }));
+    sp.appendChild(document.createTextNode('Writing your brief…'));
+    wrap.appendChild(sp);
+    return wrap;
+  }
+
+  if (S.error) {
+    wrap.appendChild(el('div', { class: 'error-box' }, '⚠ ' + S.error));
+    return wrap;
+  }
+
+  if (!S.result) return wrap;
+
+  // Tabs
+  const hasProg = S.spaces.length > 0;
+  const hasRevs = S.reviews.length > 0;
+  if (hasProg || hasRevs) {
+    const tabs = el('div', { class: 'tab-row' });
+    const tabDefs = [['brief', 'Brief']];
+    if (hasProg) tabDefs.push(['programme', 'Space Programme']);
+    if (hasRevs) tabDefs.push(['reviews', 'Review Schedule']);
+    tabDefs.forEach(([id, label]) => {
+      const b = el('button', {
+        class: 'tab-btn' + (S.resultTab === id ? ' active' : ''),
+        onClick: () => set({ resultTab: id })
+      }, label);
+      tabs.appendChild(b);
+    });
+    wrap.appendChild(tabs);
+  }
+
+  // Brief tab
+  if (S.resultTab === 'brief') {
+    const card = el('div', { class: 'result-card', style: { borderTop: `3px solid ${ac}` } });
+    const meta = el('div', { class: 'result-meta' });
+    const yPill = el('span', { class: 'meta-pill', style: { background: ac + '18', color: ac } }, `Year ${S.year}`);
+    const tPill = el('span', { style: { fontSize: '13px', color: 'var(--text2)' } }, S.theme);
+    meta.append(yPill, tPill);
+    card.appendChild(meta);
+
+    const sections = parseSections(S.result);
+    const hasSecs = sections.some(s => s.label);
+    if (!hasSecs) {
+      card.appendChild(el('div', { class: 'result-body' }, S.result));
+    } else {
+      sections.forEach((s, i) => {
+        if (!s.text) return;
+        if (!s.label) {
+          card.appendChild(el('p', { style: { fontFamily: 'Georgia,serif', fontSize: '13px', color: 'var(--text2)', lineHeight: '1.7', marginBottom: '0.75rem' } }, s.text));
+          return;
+        }
+        const sec = el('div', { class: 'result-section' });
+        sec.appendChild(el('span', { class: 'result-badge', style: { background: ac + '18', color: ac } }, s.label));
+        sec.appendChild(el('div', { class: 'result-body', style: { marginTop: '8px' } }, s.text));
+        card.appendChild(sec);
+      });
+    }
+    wrap.appendChild(card);
+  }
+
+  // Programme tab
+  if (S.resultTab === 'programme' && hasProg) {
+    const card = el('div', { class: 'result-card', style: { borderTop: `3px solid ${ac}` } });
+    card.appendChild(el('div', { class: 'meta-pill', style: { background: ac + '18', color: ac, marginBottom: '1rem', display: 'inline-block' } }, `${S.spaces.length} spaces · ${S.spaces.reduce((a, sp) => a + (parseFloat(sp.area) || 0), 0).toFixed(0)} sqm total`));
+
+    const hdr = el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 80px', gap: '8px', marginBottom: '8px' } });
+    ['Space', 'Area (sqm)'].forEach(h => hdr.appendChild(el('div', { style: { fontSize: '11px', fontWeight: '600', color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.06em' } }, h)));
+    card.appendChild(hdr);
+
+    S.spaces.forEach(sp => {
+      const row = el('div', { style: { display: 'grid', gridTemplateColumns: '1fr 80px', gap: '8px', padding: '10px 0', borderBottom: '0.5px solid var(--border)' } });
+      const nameCol = el('div', {});
+      nameCol.appendChild(el('div', { style: { fontSize: '14px', fontWeight: '500', marginBottom: sp.notes ? '3px' : '0' } }, sp.name));
+      if (sp.notes) nameCol.appendChild(el('div', { style: { fontSize: '12px', color: 'var(--text2)' } }, sp.notes));
+      row.appendChild(nameCol);
+      row.appendChild(el('div', { style: { fontSize: '14px', color: 'var(--text2)' } }, sp.area + ' sqm'));
+      card.appendChild(row);
+    });
+    wrap.appendChild(card);
+  }
+
+  // Reviews tab
+  if (S.resultTab === 'reviews' && hasRevs) {
+    const card = el('div', { class: 'result-card', style: { borderTop: `3px solid ${ac}` } });
+    card.appendChild(el('div', { class: 'meta-pill', style: { background: ac + '18', color: ac, marginBottom: '1.25rem', display: 'inline-block' } }, `${S.reviews.length} reviews over ${S.duration || '?'} weeks`));
+    
+    // Create table
+    const table = el('div', { style: { display: 'grid', gridTemplateColumns: '70px 140px 1fr 1fr', gap: 0, fontSize: '13px', lineHeight: '1.65' } });
+    
+    // Header row with bottom border
+    const headerStyle = { padding: '8px 10px', fontWeight: '600', color: 'var(--text)', borderBottom: '1px solid var(--text)', paddingBottom: '10px', marginBottom: '10px' };
+    table.appendChild(el('div', { style: { ...headerStyle, borderRight: '1px solid var(--border)' } }, 'Week'));
+    table.appendChild(el('div', { style: { ...headerStyle, borderRight: '1px solid var(--border)' } }, 'Review'));
+    table.appendChild(el('div', { style: { ...headerStyle, borderRight: '1px solid var(--border)' } }, "What's Ready"));
+    table.appendChild(el('div', { style: headerStyle }, 'Questions'));
+    
+    // Data rows
+    S.reviews.forEach(r => {
+      const cellStyle = { padding: '8px 10px', color: 'var(--text-secondary)', borderRight: '1px solid var(--border)' };
+      const lastCellStyle = { padding: '8px 10px', color: 'var(--text-secondary)' };
+      
+      const weekCell = el('div', { style: { ...cellStyle, fontWeight: '500', color: 'var(--text)' } }, `W${r.week}`);
+      const nameCell = el('div', { style: { ...cellStyle, fontWeight: '500', color: r.anchor ? ac : 'var(--text)' } }, r.name + (r.anchor ? ' ★' : ''));
+      
+      // Split desc into what's ready and questions (split on last sentence roughly)
+      const sentences = r.desc.split('. ');
+      let ready = '', questions = '';
+      if (sentences.length === 1) {
+        ready = sentences[0];
+      } else {
+        ready = sentences.slice(0, Math.ceil(sentences.length / 2)).join('. ');
+        if (!ready.endsWith('.')) ready += '.';
+        questions = sentences.slice(Math.ceil(sentences.length / 2)).join('. ');
+        if (!questions.endsWith('.')) questions += '.';
+      }
+      
+      const readyCell = el('div', { style: cellStyle }, ready);
+      const qCell = el('div', { style: lastCellStyle }, questions);
+      
+      table.appendChild(weekCell);
+      table.appendChild(nameCell);
+      table.appendChild(readyCell);
+      table.appendChild(qCell);
+    });
+    
+    card.appendChild(table);
+    wrap.appendChild(card);
+  }
+
+  // Action row
+  const actions = el('div', { class: 'action-row' });
+  const regenBtn = el('button', { class: 'secondary-btn', onClick: async () => {
+    set({ result: '', loading: true, error: '' });
+    try { const t = await claude(genBriefPrompt()); set({ result: t, loading: false }); }
+    catch (e) { set({ error: e.message, loading: false }); }
+  }}, icon('ti-refresh', { fontSize: '14px' }), ' Regenerate brief');
+  const newBrief = el('button', { class: 'secondary-btn', onClick: () => set({ view: 'home', result: '', error: '', genStep: 1, spaces: [], reviews: [], theme: '', intent: '', draft: '' }) },
+    icon('ti-plus', { fontSize: '14px' }), ' New brief');
+  actions.append(regenBtn, newBrief);
+  wrap.appendChild(actions);
+
+  return wrap;
+}
+
+function fullExport() {
+  let out = S.result;
+  if (S.spaces.length > 0) {
+    out += '\n\n---\nSPACE PROGRAMME\n';
+    S.spaces.forEach(sp => { out += `\n${sp.name}: ${sp.area} sqm${sp.notes ? ' — ' + sp.notes : ''}`; });
+  }
+  if (S.reviews.length > 0) {
+    out += '\n\n---\nREVIEW SCHEDULE\n';
+    S.reviews.forEach(r => { out += `\nWeek ${r.week}: ${r.name}${r.anchor ? ' ★' : ''}\n${r.desc}\n`; });
+  }
+  return out;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  let view;
+  if (S.view === 'home') view = viewHome();
+  else if (S.view === 'generate') view = viewGenerate();
+  else if (S.view === 'result') view = viewResult();
+  else if (S.view === 'apikey') view = viewApiKey();
+  if (view) app.appendChild(view);
+}
+
+render();
+</script>
+</body>
+</html>
