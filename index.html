@@ -147,7 +147,8 @@
     <h1>Brief Enhancer</h1>
   </div>
   <p class="tagline">Briefs that invite discovery.</p>
-  <p style="font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">The brief leads the participant on a journey of discovery. The design of a building is merely the vehicle for this journey, not the destination.</p>
+  <p style="font-size: 12px; color: var(--text2); line-height: 1.7; margin-bottom: 0.5rem; font-style: italic;">The brief leads the participant on a journey of discovery. The design of a building is merely the vehicle for this journey, not the destination.</p>
+  <p id="about-author-wrap" style="margin-bottom: 1.5rem;"><button onclick="showAbout();" style="background: none; border: none; padding: 0; font: inherit; font-size: 12px; color: var(--text3); cursor: pointer; border-bottom: 0.5px solid var(--border);">About the Author</button></p>
 
   <div id="app"></div>
 </div>
@@ -183,6 +184,9 @@ const S = {
 
 function set(upd) { Object.assign(S, typeof upd === 'function' ? upd(S) : upd); render(); }
 
+let _preAboutView = null;
+function showAbout() { _preAboutView = S.view; set({ view: 'about' }); }
+
 const YCOLS = { '2': '#1D5E8A', '3': '#2E5E3A', '4': '#5C2E2E', '5': '#4A3728' };
 function activeColor() { return YCOLS[S.year] || '#2E3F5C'; }
 
@@ -197,7 +201,7 @@ const INCONSISTENCY_PROMPT = (uploadedText, inputs) => 'Analyze this brief again
 
 const ENHANCE_PROMPT = (uploadedText) => 'Rewrite this brief to be richer, more invitational, and more carefully crafted.\n\n' +
   'BRIEF: ' + uploadedText + '\n\n' +
-  'Return enhanced brief prose only (no programme, no headings for programme). Aim for: conversational tone, precise vocabulary (liminal, palimpsest), flowing prose, implicit connections, voice that trusts the student.';
+  'Return enhanced brief prose only (no programme, no headings for programme). Aim for: conversational tone; a vocabulary set one register above the habitual language of project briefs, varied brief to brief so no signature diction emerges, and calibrated for readers who may not be writing in their first language; flowing prose; implicit connections; a voice that trusts the student.';
 
 const PROGRAMME_PROMPT = (uploadedText, inputs) => 'You are an architecture programme consultant.\n\n' +
   'TASK 1 - EXTRACT: Check if the uploaded brief already contains an explicit space programme (a list of spaces/rooms with areas in sqm). If found, extract it exactly as stated (name + area only). If none is present, return an empty array.\n\n' +
@@ -502,8 +506,14 @@ function viewStep1() {
 
   const keySet = S.apiKey && S.apiKey.trim().length > 10;
   const statusBar = el('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: keySet ? '#E8F5EE' : '#FFF3E0', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '8px', padding: '8px 12px', marginBottom: '1.25rem' } });
+  const statusText = keySet
+    ? el('span', { style: { fontSize: '12.5px', color: '#2E5E3A' } }, '✓ API key configured')
+    : el('div', {},
+        el('div', { style: { fontSize: '12.5px', fontWeight: '600', color: '#7A4500' } }, 'A free API key is required'),
+        el('div', { style: { fontSize: '11.5px', color: '#7A4500', marginTop: '2px' } }, 'Set it up first to avoid losing your work.')
+      );
   statusBar.append(
-    el('span', { style: { fontSize: '12.5px', color: keySet ? '#2E5E3A' : '#7A4500' } }, keySet ? '✓ API key configured' : '⚠ API key not set'),
+    statusText,
     el('button', { style: { background: 'none', border: '0.5px solid ' + (keySet ? '#A8D5B8' : '#FFB74D'), borderRadius: '6px', padding: '4px 10px', fontSize: '12px', cursor: 'pointer', color: keySet ? '#2E5E3A' : '#7A4500', fontFamily: 'inherit' }, onClick: () => set({ view: 'apikey' }) }, keySet ? 'Change' : 'Add')
   );
   wrap.appendChild(statusBar);
@@ -800,6 +810,7 @@ function viewApiKey() {
   const infoBox = el('div', { style: { background: '#F0F4FF', border: '0.5px solid #C5D0EE', borderRadius: '8px', padding: '0.875rem 1rem', marginBottom: '1.25rem' } });
   infoBox.appendChild(el('p', { style: { margin: '0 0 8px', fontSize: '13.5px', fontWeight: '500', color: '#2E3F5C' } }, 'Your Anthropic API key'));
   infoBox.appendChild(el('p', { style: { margin: 0, fontSize: '13px', color: '#555', lineHeight: '1.65' } }, 'Stored only in your browser. Visit platform.anthropic.com to create one.'));
+  infoBox.appendChild(el('p', { style: { margin: '8px 0 0', fontSize: '12.5px', color: '#2E3F5C', lineHeight: '1.6' } }, 'New to this? ', el('a', { href: 'https://platform.claude.com', target: '_blank', rel: 'noopener noreferrer', style: { color: '#2E3F5C', fontWeight: '600', textDecoration: 'underline' } }, 'Create a free key here ↗'), ' — creating it costs nothing; using it is billed per brief, typically a few cents.'));
   wrap.appendChild(infoBox);
 
   const keyField = el('div', { class: 'field' });
@@ -821,18 +832,34 @@ function viewApiKey() {
   return wrap;
 }
 
+function viewAbout() {
+  const wrap = el('div', {});
+  wrap.append(
+    el('div', { class: 'nav' },
+      el('button', { class: 'nav-btn', onClick: () => set({ view: _preAboutView }) }, el('i', { class: 'ti ti-arrow-left', style: { fontSize: '14px' } }), ' Back')
+    )
+  );
+  const card = el('div', { style: { fontFamily: 'Georgia, serif', fontSize: '14.5px', lineHeight: '1.9', color: 'var(--text)' } });
+  card.appendChild(el('p', {}, 'Pranay Deep (architect, mentor) has long argued that a brief should open a question, not close one. This is that conviction, written down.'));
+  wrap.appendChild(card);
+  return wrap;
+}
+
 // ── RENDER ───────────────────────────────────────────────────────────────
 function render() {
   const app = document.getElementById('app');
   app.innerHTML = '';
   let view;
-  if (S.view === 'apikey') view = viewApiKey();
+  if (S.view === 'about') view = viewAbout();
+  else if (S.view === 'apikey') view = viewApiKey();
   else if (S.view === 'inconsistencies') view = viewInconsistencies();
   else if (S.step === 1) view = viewStep1();
   else if (S.step === 2) view = viewStep2();
   else if (S.step === 3) view = viewProgrammeCompare();
   else if (S.step === 4) view = viewFinal();
   if (view) app.appendChild(view);
+  const aboutWrap = document.getElementById('about-author-wrap');
+  if (aboutWrap) aboutWrap.style.display = (S.view === 'about') ? 'none' : '';
 }
 
 render();
